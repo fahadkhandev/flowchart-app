@@ -23,12 +23,12 @@ function buildEdges(nodes) {
     .map((node) => {
       const parentId = String(getNodeParentId(node))
       const parentNode = nodesById.get(parentId)
-      const fromConnector = parentNode?.type === 'dateTimeConnector'
+      const isConnectorChild = node.type === 'dateTimeConnector'
       return {
         id: `edge-${parentId}-${node.id}`,
         source: parentId,
         target: node.id,
-        type: fromConnector ? 'connectorChild' : 'tree',
+        type: isConnectorChild ? 'connectorChild' : 'tree',
         style: { stroke: '#94a3b8', strokeWidth: 2 },
       }
     })

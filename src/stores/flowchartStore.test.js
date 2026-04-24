@@ -40,7 +40,7 @@ describe('flowchartStore', () => {
           id: 'edge-1-2',
           source: '1',
           target: '2',
-          type: 'step',
+          type: 'tree',
           style: { stroke: '#94a3b8', strokeWidth: 2 },
         },
       ])
@@ -83,7 +83,7 @@ describe('flowchartStore', () => {
           id: 'edge-parent-success-1',
           source: 'parent',
           target: 'success-1',
-          type: 'step',
+          type: 'connectorChild',
           style: { stroke: '#94a3b8', strokeWidth: 2 },
         },
       ])

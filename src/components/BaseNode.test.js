@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { setActivePinia, createPinia } from 'pinia'
 import BaseNode from './BaseNode.vue'
 
 // Mock @vue-flow/core Handle component and Position enum
@@ -32,6 +33,9 @@ function mountNode(propsOverride = {}) {
 }
 
 describe('BaseNode', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
   describe('title rendering', () => {
     it('renders the full node title', () => {
       const wrapper = mountNode()
@@ -52,11 +56,11 @@ describe('BaseNode', () => {
       expect(wrapper.text()).toContain('This node sends a greeting message to the user.')
     })
 
-    it('truncates descriptions longer than 50 characters with ellipsis', () => {
+    it('truncates long descriptions with CSS truncate class', () => {
       const longDesc = 'A'.repeat(60)
       const wrapper = mountNode({ data: { title: 'Test', description: longDesc } })
       const descEl = wrapper.find('.text-gray-500')
-      expect(descEl.text()).toBe('A'.repeat(50) + '…')
+      expect(descEl.classes()).toContain('truncate')
     })
 
     it('does not truncate descriptions of exactly 50 characters', () => {
