@@ -1,0 +1,107 @@
+/**
+ * Node type constants and helpers.
+ *
+ * The remote payload uses the following type strings:
+ *   'sendMessage', 'addComment', 'dateTime', 'dateTimeConnector', 'trigger'
+ *
+ * NODE_TYPES maps the semantic names used in the UI to those payload strings.
+ *
+ * icons.svg (public/icons.svg) contains the following symbol ids:
+ *   bluesky-icon, discord-icon, documentation-icon, github-icon, social-icon, x-icon
+ *
+ * Since the sprite does not include purpose-built node icons, we map each node
+ * type to the closest thematic symbol and use 'documentation-icon' as the
+ * generic fallback.
+ */
+
+/**
+ * Maps semantic node names to the type strings used in the remote payload.
+ * @type {Readonly<{sendMessage: string, addComment: string, businessHours: string, success: string, failure: string, trigger: string}>}
+ */
+export const NODE_TYPES = Object.freeze({
+  sendMessage: 'sendMessage',
+  addComment: 'addComment',
+  businessHours: 'dateTime',
+  success: 'dateTimeConnector',
+  failure: 'dateTimeConnector',
+  trigger: 'trigger',
+})
+
+/**
+ * Node type strings that are read-only (display-only) — users cannot edit
+ * or drag these nodes.
+ * @type {string[]}
+ */
+export const DISPLAY_ONLY_TYPES = ['dateTimeConnector', 'trigger']
+
+/**
+ * Returns true when the given type string is display-only.
+ * @param {string} type
+ * @returns {boolean}
+ */
+export function isDisplayOnly(type) {
+  return DISPLAY_ONLY_TYPES.includes(type)
+}
+
+/**
+ * Returns the SVG symbol id (for use with the public/icons.svg sprite) that
+ * best represents the given node type.
+ *
+ * Mapping rationale (using available sprite symbols):
+ *   sendMessage   → 'social-icon'       (communication / messaging)
+ *   addComment    → 'documentation-icon' (writing / notes)
+ *   dateTime      → 'documentation-icon' (schedule / document — closest match)
+ *   dateTimeConnector → 'x-icon'        (connector / branch outcome)
+ *   trigger       → 'github-icon'       (workflow trigger — closest match)
+ *   fallback      → 'documentation-icon'
+ *
+ * @param {string} type - The node type string from the payload.
+ * @returns {string} SVG symbol id.
+ */
+export function getNodeIcon(type) {
+  const iconMap = {
+    sendMessage: 'social-icon',
+    addComment: 'documentation-icon',
+    dateTime: 'documentation-icon',
+    dateTimeConnector: 'documentation-icon',
+    trigger: 'github-icon',
+  }
+  return iconMap[type] ?? 'documentation-icon'
+}
+
+/**
+ * Human-readable display labels for each payload type string.
+ * @type {Record<string, string>}
+ */
+export const NODE_TYPE_LABELS = {
+  sendMessage: 'Send Message',
+  addComment: 'Add Comment',
+  dateTime: 'Business Hours',
+  dateTimeConnector: 'Connector',
+  trigger: 'Trigger',
+}
+
+/**
+ * Returns a Tailwind CSS class string for the node's border and background
+ * colour, keyed by payload type string.
+ * For dateTimeConnector nodes, pass connectorType to differentiate success/failure.
+ *
+ * @param {string} type - The node type string from the payload.
+ * @param {string} [connectorType] - 'success' | 'failure' for dateTimeConnector nodes.
+ * @returns {string} Tailwind CSS classes for border and background.
+ */
+export function getNodeTypeColor(type, connectorType) {
+  if (type === 'dateTimeConnector') {
+    return connectorType === 'success'
+      ? 'border-green-400 bg-green-50'
+      : 'border-red-400 bg-red-50'
+  }
+
+  const colorMap = {
+    sendMessage: 'border-blue-400 bg-blue-50',
+    addComment: 'border-yellow-400 bg-yellow-50',
+    dateTime: 'border-purple-400 bg-purple-50',
+    trigger: 'border-green-400 bg-green-50',
+  }
+  return colorMap[type] ?? 'border-gray-300 bg-white'
+}
