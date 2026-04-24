@@ -82,12 +82,20 @@ async function onNodeDragStop({ node }) {
 }
 
 /**
- * Handle node click: navigate to the node detail route.
- * Connector nodes are display-only branches and should not open the drawer.
+ * Handle node click: select the node (for child creation) and navigate to detail.
+ * Connector nodes are display-only branches and should not be selected.
  */
 function onNodeClick({ node }) {
   if (locked.value || node.type === 'dateTimeConnector') return
+  flowchartStore.setSelectedNodeId(node.id)
   router.push({ name: 'node-detail', params: { id: node.id } })
+}
+
+/**
+ * Clicking the empty canvas pane clears the selection.
+ */
+function onPaneClick() {
+  flowchartStore.setSelectedNodeId(null)
 }
 
 /**
@@ -207,6 +215,7 @@ async function onNodesInitialized() {
       @node-drag-start="onNodeDragStart"
       @node-drag-stop="onNodeDragStop"
       @node-click="onNodeClick"
+      @pane-click="onPaneClick"
       @nodes-initialized="onNodesInitialized"
     >
       <MiniMap />

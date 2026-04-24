@@ -3,6 +3,7 @@ import { computed, inject, ref } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import { getNodeIcon, getNodeTypeColor, NODE_TYPE_LABELS, isDisplayOnly } from '../utils/nodeTypes.js'
 import { useFlowchartStore } from '../stores/flowchartStore.js'
+import { storeToRefs } from 'pinia'
 import { useHistoryStore } from '../stores/historyStore.js'
 import { createNode, deleteNode as apiDeleteNode, restoreNodes, relayoutNodes } from '../api/nodes.js'
 
@@ -18,6 +19,8 @@ const emit = defineEmits(['select'])
 const flowchartStore = useFlowchartStore()
 const historyStore = useHistoryStore()
 const locked = inject('locked', { value: false })
+const { selectedNodeId } = storeToRefs(flowchartStore)
+const isSelected = computed(() => selectedNodeId.value === props.id)
 
 const isHovered = ref(false)
 const isAddingChild = ref(false)
@@ -153,6 +156,7 @@ async function handleDelete() {
         ? 'w-[110px] rounded-full border px-3 py-2 shadow-sm'
         : 'w-[260px] rounded-2xl border-2 px-4 py-3 shadow-[0_10px_30px_rgba(15,23,42,0.08)]',
       getNodeTypeColor(type, data.connectorType),
+      isSelected && !isConnectorNode ? 'ring-2 ring-blue-500 ring-offset-2' : '',
       isDisplayOnly(type) ? 'opacity-80' : 'hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(15,23,42,0.12)]',
     ]"
     :tabindex="isInteractiveNode(type) ? 0 : -1"

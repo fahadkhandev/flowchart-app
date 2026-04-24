@@ -36,9 +36,14 @@
           >
             <!-- Header -->
             <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-200">
-              <h2 :id="titleId" class="text-lg font-semibold text-gray-900">
-                Create New Node
-              </h2>
+              <div>
+                <h2 :id="titleId" class="text-lg font-semibold text-gray-900">
+                  Create New Node
+                </h2>
+                <p class="mt-0.5 text-xs text-gray-500">
+                  Will be added as a child of the selected node
+                </p>
+              </div>
               <button
                 ref="closeButtonRef"
                 type="button"
@@ -151,7 +156,7 @@
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
 import { useMutation } from '@tanstack/vue-query'
-import { createNode } from '../api/nodes.js'
+import { createNode, relayoutNodes } from '../api/nodes.js'
 import { useFlowchartStore } from '../stores/flowchartStore.js'
 import { NODE_TYPES } from '../utils/nodeTypes.js'
 import { validateRequired } from '../utils/validation.js'
@@ -164,6 +169,10 @@ const props = defineProps({
   modelValue: {
     type: Boolean,
     required: true,
+  },
+  parentId: {
+    type: String,
+    default: null,
   },
 })
 
@@ -209,8 +218,9 @@ const isSubmitDisabled = computed(() => {
 
 const { mutate, isPending } = useMutation({
   mutationFn: (data) => createNode(data),
-  onSuccess: (newNode) => {
-    flowchartStore.addNode(newNode)
+  onSuccess: async (newNode) => {
+    const relaidOut = await relayoutNodes()
+    flowchartStore.setNodes(relaidOut)
     emit('node-created', newNode)
     emit('update:modelValue', false)
     resetForm()
@@ -224,7 +234,7 @@ const { mutate, isPending } = useMutation({
 function handleSubmit() {
   touchedTitle.value = true
   if (validateRequired(form.value.title)) return
-  mutate({ ...form.value })
+  mutate({ ...form.value, parentId: props.parentId })
 }
 
 function close() {
