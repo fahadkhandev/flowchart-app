@@ -1,60 +1,69 @@
 <template>
 	<div class="absolute top-4 left-4 flex flex-col items-start gap-2 z-10">
-		<div class="flex items-center gap-3">
-			<!-- Undo / Redo group -->
-			<div
-				class="flex items-center rounded-md shadow border border-gray-300 overflow-hidden"
+		<!-- Add Node button -->
+		<button
+			class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md shadow transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+			:class="selectedNodeId
+				? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
+				: 'bg-blue-100 text-blue-400 cursor-not-allowed'"
+			:disabled="!selectedNodeId"
+			:title="selectedNodeId ? 'Add child node' : 'Select a node first to add a child'"
+			:aria-label="selectedNodeId ? 'Add child node' : 'Select a node first to add a child'"
+			@click="selectedNodeId && $emit('open-create-modal')"
+		>
+			<PlusIcon class="w-4 h-4" />
+			{{ selectedNodeId ? 'Add Node' : 'Select a node first' }}
+		</button>
+
+		<!-- Undo / Redo group -->
+		<div class="flex items-center rounded-md shadow border border-gray-300 overflow-hidden">
+			<button
+				class="px-3 py-2 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 border-r border-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
+				:disabled="!historyStore.canUndo"
+				:aria-disabled="!historyStore.canUndo"
+				aria-label="Undo (Ctrl+Z)"
+				title="Undo (Ctrl+Z)"
+				@click="historyStore.undo()"
 			>
-				<button
-					class="px-3 py-2 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 border-r border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-					:disabled="!historyStore.canUndo"
-					:aria-disabled="!historyStore.canUndo"
-					aria-label="Undo (Ctrl+Z)"
-					title="Undo (Ctrl+Z)"
-					@click="historyStore.undo()"
-				>
-					↩ Undo
-				</button>
-				<button
-					class="px-3 py-2 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-					:disabled="!historyStore.canRedo"
-					:aria-disabled="!historyStore.canRedo"
-					aria-label="Redo (Ctrl+Y)"
-					title="Redo (Ctrl+Y)"
-					@click="historyStore.redo()"
-				>
-					↪ Redo
-				</button>
-			</div>
+				<ArrowUturnLeftIcon class="w-4 h-4" />
+			</button>
+			<button
+				class="px-3 py-2 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
+				:disabled="!historyStore.canRedo"
+				:aria-disabled="!historyStore.canRedo"
+				aria-label="Redo (Ctrl+Y)"
+				title="Redo (Ctrl+Y)"
+				@click="historyStore.redo()"
+			>
+				<ArrowUturnRightIcon class="w-4 h-4" />
+			</button>
 		</div>
 
 		<!-- Zoom controls: vertical -->
-		<div
-			class="flex flex-col rounded-md shadow border border-gray-300 overflow-hidden"
-		>
+		<div class="flex flex-col rounded-md shadow border border-gray-300 overflow-hidden">
 			<button
-				class="px-3 py-2 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 border-b border-gray-300 leading-none"
+				class="px-3 py-2 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 border-b border-gray-300"
 				title="Zoom in"
 				aria-label="Zoom in"
 				@click="zoomIn()"
 			>
-				+
+				<MagnifyingGlassPlusIcon class="w-4 h-4" />
 			</button>
 			<button
-				class="px-3 py-2 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 border-b border-gray-300 leading-none"
+				class="px-3 py-2 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 border-b border-gray-300"
 				title="Zoom out"
 				aria-label="Zoom out"
 				@click="zoomOut()"
 			>
-				−
+				<MagnifyingGlassMinusIcon class="w-4 h-4" />
 			</button>
 			<button
-				class="px-3 py-2 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 leading-none"
+				class="px-3 py-2 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
 				title="Fit view"
 				aria-label="Fit view"
 				@click="fitView()"
 			>
-				⊡
+				<ArrowsPointingOutIcon class="w-4 h-4" />
 			</button>
 		</div>
 
@@ -66,27 +75,33 @@
 			:aria-label="locked ? 'Unlock canvas' : 'Lock canvas'"
 			@click="toggleLock()"
 		>
-			<!-- Locked icon -->
-			<svg v-if="locked" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-				<rect x="5" y="11" width="14" height="10" rx="2" stroke-width="2" stroke-linejoin="round" />
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 0 1 8 0v4" />
-			</svg>
-			<!-- Unlocked icon -->
-			<svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-				<rect x="5" y="11" width="14" height="10" rx="2" stroke-width="2" stroke-linejoin="round" />
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 0 1 8 0" />
-			</svg>
+			<LockClosedIcon v-if="locked" class="w-4 h-4" />
+			<LockOpenIcon v-else class="w-4 h-4" />
 		</button>
 	</div>
 </template>
 
 <script setup>
 import { inject, onMounted, onUnmounted } from "vue";
+import { useFlowchartStore } from "../stores/flowchartStore.js";
+import { storeToRefs } from "pinia";
+import {
+	ArrowUturnLeftIcon,
+	ArrowUturnRightIcon,
+	MagnifyingGlassPlusIcon,
+	MagnifyingGlassMinusIcon,
+	ArrowsPointingOutIcon,
+	LockClosedIcon,
+	LockOpenIcon,
+	PlusIcon,
+} from "@heroicons/vue/24/outline";
 import { useHistoryStore } from "../stores/historyStore.js";
 
 defineEmits(["open-create-modal"]);
 
 const historyStore = useHistoryStore();
+const flowchartStore = useFlowchartStore();
+const { selectedNodeId } = storeToRefs(flowchartStore);
 const zoomIn = inject("zoomIn");
 const zoomOut = inject("zoomOut");
 const fitView = inject("fitView");

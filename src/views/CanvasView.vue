@@ -3,12 +3,14 @@ import { ref, watch, provide } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { fetchNodes } from '../api/nodes.js'
 import { useFlowchartStore } from '../stores/flowchartStore.js'
+import { storeToRefs } from 'pinia'
 import FlowCanvas from '../components/FlowCanvas.vue'
 import CanvasToolbar from '../components/CanvasToolbar.vue'
 import CreateNodeModal from '../components/CreateNodeModal.vue'
 import DetailsDrawer from '../components/DetailsDrawer.vue'
 
 const flowchartStore = useFlowchartStore()
+const { selectedNodeId } = storeToRefs(flowchartStore)
 
 const showCreateModal = ref(false)
 const sidebarOpen = ref(true)
@@ -20,6 +22,10 @@ provide('zoomOut', () => flowCanvasRef.value?.zoomOut?.())
 provide('fitView', () => flowCanvasRef.value?.fitView?.())
 provide('locked', locked)
 provide('toggleLock', () => { locked.value = !locked.value })
+
+function onNodeCreated() {
+  flowchartStore.setSelectedNodeId(null)
+}
 
 const { data: nodesData, isLoading, isError } = useQuery({
   queryKey: ['nodes'],
@@ -105,9 +111,12 @@ watch(
         <CanvasToolbar @open-create-modal="showCreateModal = true" />
       </template>
 
-      <!-- Always rendered — visibility driven internally -->
       <DetailsDrawer />
-      <CreateNodeModal v-model="showCreateModal" />
+      <CreateNodeModal
+        v-model="showCreateModal"
+        :parent-id="selectedNodeId"
+        @node-created="onNodeCreated"
+      />
     </div>
   </div>
 </template>
