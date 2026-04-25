@@ -380,44 +380,6 @@ function isImageAttachment(item) {
           </div>
         </section>
 
-        <!-- Delete button -->
-        <div v-if="!isRoot" class="pt-1">
-          <template v-if="!showDeleteConfirm">
-            <button
-              type="button"
-              class="w-full py-2 px-4 rounded-md text-sm font-medium border border-red-300 text-red-600 hover:bg-red-50 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-1"
-              :disabled="isDeleting"
-              @click="onDeleteClick"
-            >
-              Delete node
-            </button>
-          </template>
-          <template v-else>
-            <div class="rounded-md border border-red-200 bg-red-50 p-3 space-y-2">
-              <p class="text-sm text-red-700 font-medium">Delete this node?</p>
-              <p class="text-xs text-red-600">This will also delete all child nodes. This action cannot be undone.</p>
-              <div class="flex gap-2">
-                <button
-                  type="button"
-                  class="flex-1 py-1.5 px-3 rounded text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
-                  :disabled="isDeleting"
-                  :aria-busy="isDeleting"
-                  @click="onDeleteConfirm"
-                >
-                  {{ isDeleting ? 'Deleting…' : 'Yes, delete' }}
-                </button>
-                <button
-                  type="button"
-                  class="flex-1 py-1.5 px-3 rounded text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
-                  @click="onDeleteCancel"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </template>
-        </div>
-
         <!-- Divider -->
         <hr class="border-gray-200" />
 

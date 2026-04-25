@@ -3,17 +3,17 @@
 
 		<!-- Add Node button -->
 		<div class="rounded-md shadow border overflow-hidden"
-			:class="selectedNodeId ? 'border-blue-600' : 'border-blue-200'"
+			:class="canAddChild ? 'border-blue-600' : 'border-blue-200'"
 		>
 			<button
 				class="flex items-center justify-center w-9 h-9 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
-				:class="selectedNodeId
+				:class="canAddChild
 					? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
 					: 'bg-blue-100 text-blue-400 cursor-not-allowed'"
-				:disabled="!selectedNodeId"
-				:title="selectedNodeId ? 'Add child node' : 'Select a node first to add a child'"
-				:aria-label="selectedNodeId ? 'Add child node' : 'Select a node first to add a child'"
-				@click="selectedNodeId && $emit('open-create-modal')"
+				:disabled="!canAddChild"
+				:title="!selectedNodeId ? 'Select a node first to add a child' : canAddChild ? 'Add child node' : 'Business Hours cannot have children'"
+				:aria-label="!selectedNodeId ? 'Select a node first to add a child' : canAddChild ? 'Add child node' : 'Business Hours cannot have children'"
+				@click="canAddChild && $emit('open-create-modal')"
 			>
 				<PlusIcon class="w-4 h-4" />
 			</button>
@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-import { inject, onMounted, onUnmounted } from "vue";
+import { inject, onMounted, onUnmounted, computed } from "vue";
 import { useFlowchartStore } from "../stores/flowchartStore.js";
 import { storeToRefs } from "pinia";
 import {
@@ -111,6 +111,12 @@ defineEmits(["open-create-modal"]);
 const historyStore = useHistoryStore();
 const flowchartStore = useFlowchartStore();
 const { selectedNodeId } = storeToRefs(flowchartStore);
+
+const canAddChild = computed(() => {
+	if (!selectedNodeId.value) return false;
+	const node = flowchartStore.getNodeById(selectedNodeId.value);
+	return node?.type !== 'dateTime';
+});
 const zoomIn = inject("zoomIn");
 const zoomOut = inject("zoomOut");
 const fitView = inject("fitView");

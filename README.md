@@ -57,10 +57,10 @@ Coverage output is written to `coverage/`.
 flowchart-app/
 ├── public/
 │   ├── favicon.svg
-│   └── icons.svg              # SVG sprite for node icons
+│   └── icons.svg              # SVG sprite (used for legacy references)
 ├── src/
 │   ├── api/
-│   │   └── nodes.js           # API layer (fetch, create, update, delete, position)
+│   │   └── nodes.js           # API layer (fetch, create, update, delete, position, relayout)
 │   ├── components/
 │   │   ├── panels/
 │   │   │   ├── AddCommentPanel.vue
@@ -68,10 +68,13 @@ flowchart-app/
 │   │   │   ├── DisplayOnlyPanel.vue
 │   │   │   └── SendMessagePanel.vue
 │   │   ├── BaseNode.vue       # Custom Vue Flow node component
-│   │   ├── CanvasToolbar.vue  # Create / Undo / Redo toolbar
+│   │   ├── CanvasToolbar.vue  # Add Node / Undo / Redo / Zoom / Lock toolbar
+│   │   ├── ConnectorChildEdge.vue
 │   │   ├── CreateNodeModal.vue
 │   │   ├── DetailsDrawer.vue  # Slide-in node details panel
-│   │   └── FlowCanvas.vue     # Vue Flow canvas wrapper
+│   │   ├── FlowCanvas.vue     # Vue Flow canvas wrapper
+│   │   ├── NodeSidebar.vue    # Draggable node blocks sidebar
+│   │   └── TreeEdge.vue
 │   ├── router/
 │   │   └── index.js           # Vue Router (/ and /node/:id)
 │   ├── stores/
@@ -79,8 +82,8 @@ flowchart-app/
 │   │   ├── historyStore.js    # Pinia store — undo/redo command history
 │   │   └── index.js
 │   ├── utils/
-│   │   ├── nodeTypes.js       # NODE_TYPES, isDisplayOnly, getNodeIcon, etc.
-│   │   ├── text.js            # truncateText
+│   │   ├── nodeTypes.js       # NODE_TYPES, icons, labels, colors
+│   │   ├── text.js            # truncateText helper
 │   │   └── validation.js      # validateRequired, validateBusinessHours, etc.
 │   ├── views/
 │   │   └── CanvasView.vue     # Main view — composes all components
@@ -96,48 +99,47 @@ flowchart-app/
 
 ---
 
+## How to Create a Node
+
+1. **Single-click** any existing node on the canvas to select it (blue ring appears)
+2. The **"+" button** in the toolbar activates — click it to open the Create Node modal
+3. Fill in **Title**, **Description**, and **Type**, then hit **Create Node**
+4. The new node is added as a child of the selected node and the tree re-layouts automatically
+
+> Business Hours nodes cannot have children — the "+" button stays disabled when one is selected.
+
+---
+
 ## Key Design Decisions
 
 ### URL-driven Details Drawer
-The Details Drawer opens and closes by pushing/replacing the route (`/node/:id`). This makes the drawer state bookmarkable and browser-history-aware without extra coordination logic. Navigating to `/node/abc` opens the drawer for node `abc`; navigating back to `/` closes it.
+The Details Drawer opens by pushing the route to `/node/:id` on a single click. This makes the drawer state bookmarkable and browser-history-aware. Double-clicking is not required — one click selects the node and opens the drawer simultaneously.
 
 ### TanStack Query as the Server-State Layer
-All API interactions (fetch, create, update, delete, position) go through TanStack Query mutations. The query cache is the source of truth for persisted data. Pinia stores only ephemeral UI state (undo/redo history, selection).
-
-**Query client config** (as specified):
-```js
-{
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      networkMode: 'always',
-      staleTime: Infinity,
-      gcTime: 60 * 60 * 1000,
-    }
-  }
-}
-```
+All API interactions go through TanStack Query mutations. Pinia stores only ephemeral UI state (undo/redo history, selection).
 
 ### Controlled Vue Flow
 Vue Flow is used in controlled mode (`v-model:nodes` / `v-model:edges`) so the Pinia store owns the canonical node list. Reverting store state automatically reverts the canvas — which makes undo/redo straightforward.
 
 ### Command Pattern for Undo/Redo
-Each reversible action (move, edit, delete) is represented as a `{ do, undo, description }` command object pushed onto a bounded history stack (max 50 items) in `historyStore`. Keyboard shortcuts: `Ctrl+Z` / `Cmd+Z` to undo, `Ctrl+Y` / `Cmd+Shift+Z` to redo.
+Each reversible action (move, edit, delete) is a `{ do, undo, description }` command pushed onto a bounded history stack (max 50 items). Keyboard shortcuts: `Ctrl+Z` / `Cmd+Z` to undo, `Ctrl+Y` / `Cmd+Shift+Z` to redo.
 
 ### In-Memory API Layer
-The remote payload (`https://respond-io-fe-bucket.s3.ap-southeast-1.amazonaws.com/candidate-assessments/payload.json`) is fetched once on first load and cached in a module-level array. All mutations (create, update, delete, position) operate on this in-memory state with a simulated 300 ms network delay, making the app fully functional without a real backend.
+The remote payload is fetched once on first load and cached in a module-level array. All mutations operate on this in-memory state with a simulated 300 ms network delay, making the app fully functional without a real backend.
 
 ---
 
 ## Node Types
 
-| Type | Label | Editable | Draggable |
-|------|-------|----------|-----------|
-| `sendMessage` | Send Message | ✅ | ✅ |
-| `addComment` | Add Comment | ✅ | ✅ |
-| `dateTime` | Business Hours | ✅ | ✅ |
-| `trigger` | Trigger | ❌ (read-only) | ❌ |
-| `dateTimeConnector` | Connector | ❌ (read-only) | ❌ |
+| Type | Label | Icon | Editable | Can Have Children |
+|------|-------|------|----------|-------------------|
+| `sendMessage` | Send Message | PaperAirplaneIcon | ✅ | ✅ |
+| `addComment` | Add Comment | ChatBubbleLeftIcon | ✅ | ✅ |
+| `dateTime` | Business Hours | CalendarDaysIcon | ✅ | ❌ |
+| `trigger` | Trigger | BoltIcon | ❌ read-only | ✅ |
+| `dateTimeConnector` | Connector | — | ❌ read-only | ❌ |
+
+Icons are from [@heroicons/vue](https://heroicons.com/) (24/outline).
 
 ### Send Message
 Manages a `payload` array of text entries and file attachments. Supports uploading images, PDFs, and Word documents (max 10 MB each).
@@ -149,7 +151,20 @@ Single comment textarea with save and clear actions.
 Per-day open/close time configuration with timezone display and `closeTime > openTime` validation.
 
 ### Display-Only (Trigger / Connector)
-Rendered on the canvas for context but cannot be edited, deleted, or dragged.
+Rendered on the canvas for context but cannot be edited or deleted.
+
+---
+
+## Toolbar
+
+| Button | Action |
+|--------|--------|
+| `+` | Add child node (requires a node to be selected; disabled for Business Hours) |
+| Undo | Undo last action (`Ctrl+Z` / `Cmd+Z`) |
+| Redo | Redo last undone action (`Ctrl+Y` / `Cmd+Shift+Z`) |
+| Zoom In / Out | Zoom the canvas |
+| Fit View | Fit all nodes into view |
+| Lock | Lock canvas to prevent accidental drags |
 
 ---
 
@@ -163,5 +178,3 @@ GitHub Actions workflow at `.github/workflows/ci.yml` runs on every push and pul
 4. Build the app (`npm run build`)
 
 The pipeline blocks merging if tests fail.
-# vue3-flowchart
-# flowchart-app

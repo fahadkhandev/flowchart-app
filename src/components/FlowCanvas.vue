@@ -82,19 +82,12 @@ async function onNodeDragStop({ node }) {
 }
 
 /**
- * Single click: select the node only (enables Add Node button).
+ * Single click: select the node and open the details drawer.
  * Connector nodes are display-only and cannot be selected.
  */
 function onNodeClick({ node }) {
   if (locked.value || node.type === 'dateTimeConnector') return
   flowchartStore.setSelectedNodeId(node.id)
-}
-
-/**
- * Double click: open the details drawer for the node.
- */
-function onNodeDoubleClick({ node }) {
-  if (locked.value || node.type === 'dateTimeConnector') return
   router.push({ name: 'node-detail', params: { id: node.id } })
 }
 
@@ -222,7 +215,6 @@ async function onNodesInitialized() {
       @node-drag-start="onNodeDragStart"
       @node-drag-stop="onNodeDragStop"
       @node-click="onNodeClick"
-      @node-double-click="onNodeDoubleClick"
       @pane-click="onPaneClick"
       @nodes-initialized="onNodesInitialized"
     >

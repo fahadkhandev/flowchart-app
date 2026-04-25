@@ -81,7 +81,6 @@ describe('DetailsDrawer', () => {
     expect(wrapper.find('#drawer-title').exists()).toBe(true)
     expect(wrapper.find('#drawer-description').exists()).toBe(true)
     expect(wrapper.text()).toContain('Save')
-    expect(wrapper.text()).toContain('Delete node')
   })
 
   it('shows attachments in the drawer when the node payload contains them', async () => {
@@ -162,7 +161,7 @@ describe('DetailsDrawer', () => {
     expect(replaceMock).toHaveBeenCalledWith('/')
   })
 
-  it('deletes the selected node from the drawer', async () => {
+  it('does not show a delete button in the drawer', async () => {
     const store = useFlowchartStore()
     store.setNodes([
       {
@@ -182,16 +181,6 @@ describe('DetailsDrawer', () => {
     const wrapper = mountDrawer()
     await nextTick()
 
-    const deleteTrigger = wrapper.findAll('button').find((button) => button.text() === 'Delete node')
-    await deleteTrigger.trigger('click')
-    await nextTick()
-
-    const confirmDelete = wrapper.findAll('button').find((button) => button.text() === 'Yes, delete')
-    await confirmDelete.trigger('click')
-    await flushPromises()
-
-    expect(deleteNodeMock).toHaveBeenCalledWith('comment-1')
-    expect(store.getNodeById('comment-1')).toBeUndefined()
-    expect(pushMock).toHaveBeenCalledWith('/')
+    expect(wrapper.text()).not.toContain('Delete node')
   })
 })
