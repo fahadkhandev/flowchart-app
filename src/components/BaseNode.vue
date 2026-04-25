@@ -266,7 +266,12 @@ async function handleDelete() {
           <span class="inline-block text-xs font-medium px-1.5 py-0.5 rounded bg-white/60 text-gray-600 border border-gray-200">
             {{ NODE_TYPE_LABELS[type] ?? type }}
           </span>
-          
+          <span
+            v-if="isDisplayOnly(type)"
+            class="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-200 text-gray-500"
+          >
+            read-only
+          </span>
         </div>
 
         <p

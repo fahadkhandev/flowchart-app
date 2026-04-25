@@ -380,7 +380,8 @@ function isImageAttachment(item) {
           </div>
         </section>
 
-        <!-- <div v-if="!isRoot" class="pt-1">
+        <!-- Delete button -->
+        <div v-if="!isRoot" class="pt-1">
           <template v-if="!showDeleteConfirm">
             <button
               type="button"
@@ -415,7 +416,7 @@ function isImageAttachment(item) {
               </div>
             </div>
           </template>
-        </div> -->
+        </div>
 
         <!-- Divider -->
         <hr class="border-gray-200" />

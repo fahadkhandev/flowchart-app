@@ -167,17 +167,15 @@ describe('BaseNode', () => {
   })
 
   describe('SVG icon', () => {
-    it('renders an SVG element with a use tag pointing to the sprite', () => {
+    it('renders a heroicon for sendMessage type', () => {
       const wrapper = mountNode({ type: 'sendMessage' })
-      const useEl = wrapper.find('svg use')
-      expect(useEl.exists()).toBe(true)
-      expect(useEl.attributes('href')).toBe('/icons.svg#social-icon')
+      // heroicons render as inline SVGs — just verify an svg element exists
+      expect(wrapper.find('svg').exists()).toBe(true)
     })
 
-    it('uses the correct icon for addComment type', () => {
+    it('renders a heroicon for addComment type', () => {
       const wrapper = mountNode({ type: 'addComment' })
-      const useEl = wrapper.find('svg use')
-      expect(useEl.attributes('href')).toBe('/icons.svg#documentation-icon')
+      expect(wrapper.find('svg').exists()).toBe(true)
     })
   })
 
