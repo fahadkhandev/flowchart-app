@@ -1,7 +1,7 @@
 <script setup>
 import { computed, inject, ref } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
-import { getNodeIcon, getNodeTypeColor, NODE_TYPE_LABELS, isDisplayOnly } from '../utils/nodeTypes.js'
+import { getNodeIconComponent, getNodeTypeColor, NODE_TYPE_LABELS, isDisplayOnly } from '../utils/nodeTypes.js'
 import { useFlowchartStore } from '../stores/flowchartStore.js'
 import { storeToRefs } from 'pinia'
 import { useHistoryStore } from '../stores/historyStore.js'
@@ -209,9 +209,12 @@ async function handleDelete() {
               :disabled="isAddingChild"
               @click="handleAddChild(item.type)"
             >
-              <svg class="h-4 w-4 flex-shrink-0 text-gray-400" aria-hidden="true">
-                <use :href="`/icons.svg#${getNodeIcon(item.type)}`" />
-              </svg>
+              <component
+                :is="getNodeIconComponent(item.type)"
+                v-if="getNodeIconComponent(item.type)"
+                class="h-4 w-4 flex-shrink-0 text-gray-400"
+                aria-hidden="true"
+              />
               {{ item.label }}
             </button>
           </div>
@@ -251,24 +254,19 @@ async function handleDelete() {
 
     <!-- Node content -->
     <div :class="isConnectorNode ? 'flex items-center justify-center gap-2' : 'flex items-start gap-2'">
-      <svg
-        :class="isConnectorNode ? 'h-4 w-4 flex-shrink-0' : 'mt-0.5 h-5 w-5 flex-shrink-0'"
+      <component
+        :is="getNodeIconComponent(type)"
+        v-if="getNodeIconComponent(type) && !isConnectorNode"
+        :class="'mt-0.5 h-5 w-5 flex-shrink-0 text-gray-600'"
         aria-hidden="true"
-      >
-        <use :href="`/icons.svg#${getNodeIcon(type)}`" />
-      </svg>
+      />
 
       <div class="flex-1 min-w-0">
         <div v-if="!isConnectorNode" class="mb-1 flex items-center gap-1.5">
           <span class="inline-block text-xs font-medium px-1.5 py-0.5 rounded bg-white/60 text-gray-600 border border-gray-200">
             {{ NODE_TYPE_LABELS[type] ?? type }}
           </span>
-          <span
-            v-if="isDisplayOnly(type)"
-            class="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-200 text-gray-500"
-          >
-            read-only
-          </span>
+          
         </div>
 
         <p

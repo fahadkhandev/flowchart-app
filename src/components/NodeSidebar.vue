@@ -1,5 +1,5 @@
 <script setup>
-import { getNodeTypeColor, NODE_TYPE_LABELS, getNodeIcon } from '../utils/nodeTypes.js'
+import { getNodeTypeColor, NODE_TYPE_LABELS, getNodeIconComponent } from '../utils/nodeTypes.js'
 
 defineProps({
   open: { type: Boolean, default: true },
@@ -80,9 +80,12 @@ function onDragStart(event, nodeType) {
         >
           <!-- Icon -->
           <div class="mt-0.5 shrink-0">
-            <svg class="h-5 w-5 text-gray-600" aria-hidden="true">
-              <use :href="`/icons.svg#${getNodeIcon(item.type)}`" />
-            </svg>
+            <component
+              :is="getNodeIconComponent(item.type)"
+              v-if="getNodeIconComponent(item.type)"
+              class="h-5 w-5 text-gray-600"
+              aria-hidden="true"
+            />
           </div>
 
           <!-- Text -->

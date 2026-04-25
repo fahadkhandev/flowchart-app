@@ -1,24 +1,28 @@
 <template>
 	<div class="absolute top-4 left-4 flex flex-col items-start gap-2 z-10">
+
 		<!-- Add Node button -->
-		<button
-			class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md shadow transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-			:class="selectedNodeId
-				? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
-				: 'bg-blue-100 text-blue-400 cursor-not-allowed'"
-			:disabled="!selectedNodeId"
-			:title="selectedNodeId ? 'Add child node' : 'Select a node first to add a child'"
-			:aria-label="selectedNodeId ? 'Add child node' : 'Select a node first to add a child'"
-			@click="selectedNodeId && $emit('open-create-modal')"
+		<div class="rounded-md shadow border overflow-hidden"
+			:class="selectedNodeId ? 'border-blue-600' : 'border-blue-200'"
 		>
-			<PlusIcon class="w-4 h-4" />
-			{{ selectedNodeId ? 'Add Node' : 'Select a node first' }}
-		</button>
+			<button
+				class="flex items-center justify-center w-9 h-9 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+				:class="selectedNodeId
+					? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
+					: 'bg-blue-100 text-blue-400 cursor-not-allowed'"
+				:disabled="!selectedNodeId"
+				:title="selectedNodeId ? 'Add child node' : 'Select a node first to add a child'"
+				:aria-label="selectedNodeId ? 'Add child node' : 'Select a node first to add a child'"
+				@click="selectedNodeId && $emit('open-create-modal')"
+			>
+				<PlusIcon class="w-4 h-4" />
+			</button>
+		</div>
 
 		<!-- Undo / Redo group -->
-		<div class="flex items-center rounded-md shadow border border-gray-300 overflow-hidden">
+		<div class="flex flex-col rounded-md shadow border border-gray-300 overflow-hidden">
 			<button
-				class="px-3 py-2 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 border-r border-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
+				class="flex items-center justify-center w-9 h-9 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 border-b border-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
 				:disabled="!historyStore.canUndo"
 				:aria-disabled="!historyStore.canUndo"
 				aria-label="Undo (Ctrl+Z)"
@@ -28,7 +32,7 @@
 				<ArrowUturnLeftIcon class="w-4 h-4" />
 			</button>
 			<button
-				class="px-3 py-2 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
+				class="flex items-center justify-center w-9 h-9 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
 				:disabled="!historyStore.canRedo"
 				:aria-disabled="!historyStore.canRedo"
 				aria-label="Redo (Ctrl+Y)"
@@ -39,10 +43,10 @@
 			</button>
 		</div>
 
-		<!-- Zoom controls: vertical -->
+		<!-- Zoom controls -->
 		<div class="flex flex-col rounded-md shadow border border-gray-300 overflow-hidden">
 			<button
-				class="px-3 py-2 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 border-b border-gray-300"
+				class="flex items-center justify-center w-9 h-9 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 border-b border-gray-300"
 				title="Zoom in"
 				aria-label="Zoom in"
 				@click="zoomIn()"
@@ -50,7 +54,7 @@
 				<MagnifyingGlassPlusIcon class="w-4 h-4" />
 			</button>
 			<button
-				class="px-3 py-2 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 border-b border-gray-300"
+				class="flex items-center justify-center w-9 h-9 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 border-b border-gray-300"
 				title="Zoom out"
 				aria-label="Zoom out"
 				@click="zoomOut()"
@@ -58,7 +62,7 @@
 				<MagnifyingGlassMinusIcon class="w-4 h-4" />
 			</button>
 			<button
-				class="px-3 py-2 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+				class="flex items-center justify-center w-9 h-9 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
 				title="Fit view"
 				aria-label="Fit view"
 				@click="fitView()"
@@ -68,16 +72,21 @@
 		</div>
 
 		<!-- Lock / Unlock -->
-		<button
-			class="flex items-center justify-center w-9 h-9 rounded-md shadow border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors"
-			:class="locked ? 'border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-100' : ''"
-			:title="locked ? 'Unlock canvas' : 'Lock canvas'"
-			:aria-label="locked ? 'Unlock canvas' : 'Lock canvas'"
-			@click="toggleLock()"
+		<div class="rounded-md shadow border overflow-hidden transition-colors"
+			:class="locked ? 'border-amber-400' : 'border-gray-300'"
 		>
-			<LockClosedIcon v-if="locked" class="w-4 h-4" />
-			<LockOpenIcon v-else class="w-4 h-4" />
-		</button>
+			<button
+				class="flex items-center justify-center w-9 h-9 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors"
+				:class="locked ? 'bg-amber-50 text-amber-600 hover:bg-amber-100' : 'bg-white text-gray-700 hover:bg-gray-50'"
+				:title="locked ? 'Unlock canvas' : 'Lock canvas'"
+				:aria-label="locked ? 'Unlock canvas' : 'Lock canvas'"
+				@click="toggleLock()"
+			>
+				<LockClosedIcon v-if="locked" class="w-4 h-4" />
+				<LockOpenIcon v-else class="w-4 h-4" />
+			</button>
+		</div>
+
 	</div>
 </template>
 

@@ -5,14 +5,14 @@
  *   'sendMessage', 'addComment', 'dateTime', 'dateTimeConnector', 'trigger'
  *
  * NODE_TYPES maps the semantic names used in the UI to those payload strings.
- *
- * icons.svg (public/icons.svg) contains the following symbol ids:
- *   bluesky-icon, discord-icon, documentation-icon, github-icon, social-icon, x-icon
- *
- * Since the sprite does not include purpose-built node icons, we map each node
- * type to the closest thematic symbol and use 'documentation-icon' as the
- * generic fallback.
  */
+
+import {
+  PaperAirplaneIcon,
+  ChatBubbleLeftIcon,
+  CalendarDaysIcon,
+  BoltIcon,
+} from '@heroicons/vue/24/outline'
 
 /**
  * Maps semantic node names to the type strings used in the remote payload.
@@ -44,19 +44,26 @@ export function isDisplayOnly(type) {
 }
 
 /**
- * Returns the SVG symbol id (for use with the public/icons.svg sprite) that
- * best represents the given node type.
+ * Returns a Heroicon Vue component for the given node type.
+ * Returns null for connector nodes (no icon shown).
  *
- * Mapping rationale (using available sprite symbols):
- *   sendMessage   → 'social-icon'       (communication / messaging)
- *   addComment    → 'documentation-icon' (writing / notes)
- *   dateTime      → 'documentation-icon' (schedule / document — closest match)
- *   dateTimeConnector → 'x-icon'        (connector / branch outcome)
- *   trigger       → 'github-icon'       (workflow trigger — closest match)
- *   fallback      → 'documentation-icon'
- *
- * @param {string} type - The node type string from the payload.
- * @returns {string} SVG symbol id.
+ * @param {string} type
+ * @returns {object|null} Vue component or null
+ */
+export function getNodeIconComponent(type) {
+  const iconMap = {
+    sendMessage: PaperAirplaneIcon,
+    addComment: ChatBubbleLeftIcon,
+    dateTime: CalendarDaysIcon,
+    trigger: BoltIcon,
+  }
+  return iconMap[type] ?? null
+}
+
+/**
+ * Returns the SVG symbol id for the given node type (legacy, kept for tests).
+ * @param {string} type
+ * @returns {string}
  */
 export function getNodeIcon(type) {
   const iconMap = {

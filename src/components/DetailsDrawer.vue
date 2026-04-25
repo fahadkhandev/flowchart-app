@@ -8,15 +8,11 @@ import { updateNode as updateNodeApi, deleteNode as deleteNodeApi } from '../api
 import { NODE_TYPE_LABELS } from '../utils/nodeTypes.js'
 import { validateRequired } from '../utils/validation.js'
 
-// ---------------------------------------------------------------------------
-// Async panel components (will be created in Tasks 12–15)
-// ---------------------------------------------------------------------------
+
 const SendMessagePanel = defineAsyncComponent(() =>
   import('./panels/SendMessagePanel.vue').catch(() => ({ template: '<div></div>' }))
 )
-const AddCommentPanel = defineAsyncComponent(() =>
-  import('./panels/AddCommentPanel.vue').catch(() => ({ template: '<div></div>' }))
-)
+
 const BusinessHoursPanel = defineAsyncComponent(() =>
   import('./panels/BusinessHoursPanel.vue').catch(() => ({ template: '<div></div>' }))
 )
@@ -62,7 +58,6 @@ const panelComponent = computed(() => {
   if (!node.value) return null
   switch (node.value.type) {
     case 'sendMessage': return SendMessagePanel
-    case 'addComment': return AddCommentPanel
     case 'dateTime': return BusinessHoursPanel
     case 'trigger':
     case 'dateTimeConnector': return DisplayOnlyPanel
@@ -385,7 +380,7 @@ function isImageAttachment(item) {
           </div>
         </section>
 
-        <div v-if="!isRoot" class="pt-1">
+        <!-- <div v-if="!isRoot" class="pt-1">
           <template v-if="!showDeleteConfirm">
             <button
               type="button"
@@ -420,7 +415,7 @@ function isImageAttachment(item) {
               </div>
             </div>
           </template>
-        </div>
+        </div> -->
 
         <!-- Divider -->
         <hr class="border-gray-200" />
