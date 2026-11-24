@@ -10,10 +10,9 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/api/payload': {
-        target: 'https://respond-io-fe-bucket.s3.ap-southeast-1.amazonaws.com',
+      '/api': {
+        target: 'http://localhost:3000',
         changeOrigin: true,
-        rewrite: () => '/candidate-assessments/payload.json',
       },
     },
   },
