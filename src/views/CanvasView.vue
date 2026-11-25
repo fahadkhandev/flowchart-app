@@ -99,6 +99,7 @@ watch(
 
       <!-- Canvas -->
       <template v-else>
+        <h1>Flowchart</h1>
         <Transition
           enter-active-class="transition-opacity duration-200 ease-in"
           enter-from-class="opacity-0"
